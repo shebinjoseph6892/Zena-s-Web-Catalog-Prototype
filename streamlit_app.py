@@ -1,45 +1,28 @@
 # Import python packages
 import streamlit as st
-import requests
+from snowflake.snowpark.context import get_active_session
 from snowflake.snowpark.functions import col
 
-# Write directly to the app
-st.title("Zena's Amazing Athlesure Catalog")
-)
+st.title("Zena's Amazing Athleisure Catalog")
 
 cnx = st.connection("snowflake")
 session = cnx.session()
-my_dataframe = session.table("zenas_athleisure_db.products.catalog_for_website").select (col("COLOR_OR_STYLE"))
-#st.dataframe(data=my_dataframe, use_container_width=True)
-#st.stop()
-#Convert the snowpark dataframe to pandas datafram so we can use the LOC functions
+my_dataframe = session.table("zenas_athleisure_db.products.catalog_for_website").select(
+    col("COLOR_OR_STYLE"),
+    col("PRICE"),
+    col("FILE_NAME"),
+    col("FILE_URL"),
+    col("SIZE_LIST"),
+    col("UPSELL_PRODUCT_DESC")
+)
+
 pd_df = my_dataframe.to_pandas()
-#st.dataframe(pd_df)
-#st.stop()
 
-ingredients_list= st.multiselect ('Pick sweatsuit color or style:', my_dataframe )
+color_list = pd_df["COLOR_OR_STYLE"].tolist()
+selected_color = st.selectbox("Pick a sweatsuit color or style:", color_list)
 
-if ingredients_list:
-    #st.write(ingredients_list)
-    #st.text(ingredients_list)
-    ingredients_string = ''
-  
-    for fruit_chosen in ingredients_list:
-        ingredients_string += fruit_chosen + ' '
+if selected_color:
+    row = pd_df.loc[pd_df["COLOR_OR_STYLE"] == selected_color].iloc[0]
 
-        search_on=pd_df.loc[pd_df['FRUIT_NAME'] == fruit_chosen, 'SEARCH_ON'].iloc[0]
-        #st.write('The search value for ', fruit_chosen,' is ', search_on, '.')
-        
-        st.subheader(fruit_chosen + ' Nutrition Information')
-        smoothiefroot_response = requests.get(f"https://my.smoothiefroot.com/api/fruit/{search_on}")
-        sf_df = st.dataframe(data=smoothiefroot_response.json(), use_container_width=True)
-    #st.write(ingredients_string)
-    my_insert_stmt = """ insert into smoothies.public.orders(ingredients, name_on_order)
-                    values ('""" + ingredients_string + """','""" + Name_on_order + """')"""
+    st.image(row["FILE_URL"], caption=f"Our warm, comfortable, {selected_color} sweatsuit!", use_container_width=True)
 
-   # st.write(my_insert_stmt)
-   # st.stop()
-    time_to_insert = st.button('Submit Order')
-    if time_to_insert:
-        session.sql(my_insert_stmt).collect()
-        st.success(f'Your Smoothie is ordered, {Name_on_order}', icon="✅")
