@@ -26,3 +26,22 @@ if selected_color:
 
     st.image(row["FILE_URL"], caption=f"Our warm, comfortable, {selected_color} sweatsuit!", use_container_width=True)
 
+pd_df = my_dataframe.to_pandas()
+
+color_list = pd_df["COLOR_OR_STYLE"].tolist()
+selected_color = st.selectbox("Pick a sweatsuit color or style:", color_list)
+
+if selected_color:
+    row = pd_df.loc[pd_df["COLOR_OR_STYLE"] == selected_color].iloc[0]
+
+    st.image(row["FILE_URL"], caption=f"Our warm, comfortable, {selected_color} sweatsuit!", use_container_width=True)
+
+    st.markdown(f"**Price:** {row['PRICE']}")
+    st.markdown(f"**Sizes Available:** {row['SIZE_LIST']}")
+    upsell = row["UPSELL_PRODUCT_DESC"]
+    if upsell.startswith("Consider: "):
+        upsell = upsell.replace("Consider: ", "")
+    st.markdown(f"**BONUS:** {upsell}")
+
+
+
