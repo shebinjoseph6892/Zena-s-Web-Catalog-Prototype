@@ -9,7 +9,7 @@ st.title("Zena's Amazing Athlesure Catalog")
 
 cnx = st.connection("snowflake")
 session = cnx.session()
-my_dataframe = session.table("smoothies.public.fruit_options").select (col("FRUIT_NAME"), col("SEARCH_ON"))
+my_dataframe = session.table("zenas_athleisure_db.products.catalog_for_website").select (col("COLOR_OR_STYLE"))
 #st.dataframe(data=my_dataframe, use_container_width=True)
 #st.stop()
 #Convert the snowpark dataframe to pandas datafram so we can use the LOC functions
@@ -17,7 +17,7 @@ pd_df = my_dataframe.to_pandas()
 #st.dataframe(pd_df)
 #st.stop()
 
-ingredients_list= st.multiselect ('Choose up to 5 ingredients:', my_dataframe )
+ingredients_list= st.multiselect ('Pick sweatsuit color or style:', my_dataframe )
 
 if ingredients_list:
     #st.write(ingredients_list)
